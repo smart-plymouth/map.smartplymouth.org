@@ -25,7 +25,7 @@ jobs:
           npm install
       - name: Build
         run: |
-          CI=false npm build
+          CI=false npm run build
       - name: Copy built site to S3
         run: |
           aws s3 cp --recursive build s3://maps.smartplymouth.org/
