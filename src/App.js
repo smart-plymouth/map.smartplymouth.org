@@ -6,15 +6,26 @@ mapboxgl.accessToken = 'pk.eyJ1Ijoicm9icHV0dCIsImEiOiJjbGp2dTVpMHEwam1nM3VuMXN2d
 export default function App() {
   const mapContainer = useRef(null);
   const map = useRef(null);
-  const [lng, setLng] = useState(-4.140126714037795);
-  const [lat, setLat] = useState(50.400306583325566,);
+  const [traffic, setTraffic] = useState(false);
+  const [lng, setLng] = useState(-4.1394);
+  const [lat, setLat] = useState(50.3926);
   const [zoom, setZoom] = useState(12);
+
+  const toggleTraffic = () => {
+    if (traffic) {
+        setTraffic(false);
+        map.current.setStyle('mapbox://styles/mapbox/streets-v12')
+    } else {
+        setTraffic(true);
+        map.current.setStyle('mapbox://styles/mapbox/navigation-day-v1')
+    }
+  };
 
   useEffect(() => {
     if (map.current) return; // initialize map only once
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/navigation-night-v1',
+      style: 'mapbox://styles/mapbox/streets-v12',
       center: [lng, lat],
       zoom: zoom
     });
@@ -32,7 +43,12 @@ export default function App() {
   return (
     <div>
       <div className="sidebar">
-        Longitude: {lng} | Latitude: {lat} | Zoom: {zoom}
+      <ul>
+        <li><b>Transport</b></li>
+        <ul>
+            <li>Traffic <input type="checkbox" id="checkTraffic" name="checkTraffic" checked={traffic} onClick={toggleTraffic} /></li>
+        </ul>
+      </ul>
       </div>
       <div ref={mapContainer} className="map-container" />
     </div>
