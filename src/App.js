@@ -31,6 +31,14 @@ export default function App() {
     }
   };
 
+  const toggleEDWaitTimes = () => {
+    console.log("Emergency Department Wait Times Toggled");
+  };
+
+  const togglePublicToilets = () => {
+    console.log("Public Toilets Toggled");
+  };
+
   useEffect(() => {
     if (map.current) return; // initialize map only once
     map.current = new mapboxgl.Map({
@@ -57,16 +65,16 @@ export default function App() {
           aria-label="file system navigator"
           defaultCollapseIcon={<ExpandMoreIcon />}
           defaultExpandIcon={<ChevronRightIcon />}
-          sx={{ height: 120, flexGrow: 1, maxWidth: 400, overflowY: 'auto' }}
+          sx={{ height: 300, flexGrow: 1, maxWidth: 400, overflowY: 'auto' }}
         >
           <TreeItem nodeId="catTransport" label="Transport">
             <TreeItem icon={<TrafficIcon />} nodeId="itemTraffic" label="Traffic" onClick={toggleTraffic} />
           </TreeItem>
           <TreeItem nodeId="catHealth" label="Health">
-            <TreeItem icon={<LocalHospitalIcon />} nodeId="itemEDWaitTimes" label="Emergency Department Wait Times" />
+            <TreeItem icon={<LocalHospitalIcon />} nodeId="itemEDWaitTimes" label="Emergency Department Wait Times" onClick={toggleEDWaitTimes} />
           </TreeItem>
           <TreeItem nodeId="catAmenities" label="Amenities">
-            <TreeItem icon={<WcIcon />} nodeId="itemPublicToilets" label="Public Toilets" />
+            <TreeItem icon={<WcIcon />} nodeId="itemPublicToilets" label="Public Toilets" onClick={togglePublicToilets} />
           </TreeItem>
       </TreeView>
       </div>
