@@ -7,7 +7,7 @@ import TreeItem from '@mui/lab/TreeItem';
 // Icons
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import ElectricBikeIcon from '@mui/icons-material/ElectricBike';
+import PedalBikeIcon from '@mui/icons-material/PedalBike';
 import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
 import WcIcon from '@mui/icons-material/Wc';
 
@@ -18,6 +18,7 @@ export default function App() {
   const map = useRef(null);
   const [traffic, setTraffic] = useState(false);
   const [toilets, setToilets] = useState(false);
+  const [berylBikes, setBerylBikes] = useState(false);
   const [lng, setLng] = useState(-4.1394);
   const [lat, setLat] = useState(50.3926);
   const [zoom, setZoom] = useState(12);
@@ -34,6 +35,64 @@ export default function App() {
 
   const toggleBerylStations = async () => {
     console.log("Beryl Stations Toggled");
+    if (!berylBikes) {
+        let beryl_data = await fetch("https://gbfs.beryl.cc/v2_2/Plymouth/station_information.json").then(function(response) {
+            return response.json();
+        });
+        let stations = beryl_data.data.stations;
+
+        let beryl_geojson = {
+            'type': 'FeatureCollection',
+            'features': [
+            ]
+        }
+
+        let beryl_features = stations.map((station) => {
+                return {
+                    'type': 'Feature',
+                    'geometry': {
+                        'type': 'Point',
+                        'coordinates': [station.lon, station.lat]
+                    },
+                    'properties': {
+                        'title': station.name,
+                        'capacity': station.capacity,
+                        'id': station.station_id
+                    }
+                }
+            }
+        );
+
+        beryl_geojson.features = beryl_features;
+
+        map.current.loadImage(
+            'https://map.smartplymouth.org/icons/beryl_station.png',
+        (error, image) => {
+        if (error) throw error;
+        // Add the image to the map style.
+        map.current.addImage('beryl-icon', image);
+        });
+
+        map.current.addSource('beryl-stations', {
+            type: 'geojson',
+            data: beryl_geojson
+        });
+
+        map.current.addLayer({
+                'id': 'beryl-layer',
+                'type': 'symbol',
+                'source': 'beryl-stations',
+                'layout': {
+                    'icon-image': 'beryl-icon',
+                }
+        });
+
+        setBerylBikes(true);
+    } else {
+        map.current.removeLayer('beryl-layer');
+        map.current.removeSource('beryl-stations');
+        setBerylBikes(false);
+    }
   };
 
   const toggleEDWaitTimes = async () => {
@@ -183,7 +242,7 @@ export default function App() {
           sx={{ height: 300, flexGrow: 1, maxWidth: 400, overflowY: 'auto' }}
         >
           <TreeItem nodeId="catTransport" label="Transport">
-            <TreeItem icon={<ElectricBikeIcon />} nodeId="itemBerylStations" label="Beryl Bike Stations" onClick={toggleBerylStations} />
+            <TreeItem icon={<PedalBikeIcon />} nodeId="itemBerylStations" label="Beryl Bike Stations" onClick={toggleBerylStations} />
           </TreeItem>
           <TreeItem nodeId="catHealth" label="Health">
             <TreeItem icon={<LocalHospitalIcon />} nodeId="itemEDWaitTimes" label="Emergency Department Wait Times" onClick={toggleEDWaitTimes} />
