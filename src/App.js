@@ -87,6 +87,48 @@ export default function App() {
                 }
         });
 
+        map.current.on('click', 'beryl-layer', async (e) => {
+            // Copy coordinates array.
+            const coordinates = e.features[0].geometry.coordinates.slice();
+            const properties = e.features[0].properties;
+
+            // Ensure that if the map is zoomed out such that multiple
+            // copies of the feature are visible, the popup appears
+            // over the copy being pointed to.
+            while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+                coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+            }
+
+            let station_status = await fetch("https://gbfs.beryl.cc/v2_2/Plymouth/station_status.json").then(function(response) {
+                return response.json();
+            });
+            let selectedStation = null;
+            for (let currentStation in station_status.data.stations) {
+                if (properties.id == station_status.data.stations[currentStation].station_id) {
+                    selectedStation = station_status.data.stations[currentStation]
+                }
+            }
+
+            new mapboxgl.Popup()
+            .setLngLat(coordinates)
+            .setHTML(
+                "<h3>" + properties.title + "</h3>" +
+                "<strong>Available Bikes: </strong>" + selectedStation.num_bikes_available + "/" + properties.capacity + "<br/><br/>" +
+                "<a href='https://berylitics.smartplymouth.org/stations/" + properties.id + "'>View History</a>"
+            )
+            .addTo(map.current);
+        });
+
+        // Change the cursor to a pointer when the mouse is over the places layer.
+            map.current.on('mouseenter', 'beryl-layer', () => {
+            map.current.getCanvas().style.cursor = 'pointer';
+        });
+
+        // Change it back to a pointer when it leaves.
+            map.current.on('mouseleave', 'beryl-layer', () => {
+            map.current.getCanvas().style.cursor = '';
+        });
+
         setBerylBikes(true);
     } else {
         map.current.removeLayer('beryl-layer');
@@ -177,7 +219,7 @@ export default function App() {
 
             new mapboxgl.Popup()
             .setLngLat(coordinates)
-            .setHTML("<h2>" + properties.title + "</h2>" +
+            .setHTML("<h3>" + properties.title + "</h3>" +
                      "<strong>Address: </strong>" + properties.address + "<br />" +
                      "<strong>Fee: </strong>" + properties.fee + "<br />" +
                      "<strong>Attributes: </strong>" + html_attributes + "<br />" +
