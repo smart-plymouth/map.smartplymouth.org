@@ -19,6 +19,7 @@ export default function App() {
   const [traffic, setTraffic] = useState(false);
   const [toilets, setToilets] = useState(false);
   const [berylBikes, setBerylBikes] = useState(false);
+  const [waitTimes, setWaitTimes] = useState(false);
   const [lng, setLng] = useState(-4.1394);
   const [lat, setLat] = useState(50.3926);
   const [zoom, setZoom] = useState(12);
@@ -113,8 +114,7 @@ export default function App() {
             .setLngLat(coordinates)
             .setHTML(
                 "<h3>" + properties.title + "</h3>" +
-                "<strong>Available Bikes: </strong>" + selectedStation.num_bikes_available + "/" + properties.capacity + "<br/><br/>" +
-                "<a href='https://berylitics.smartplymouth.org/stations/" + properties.id + "'>View History</a>"
+                "<strong>Available Bikes: </strong>" + selectedStation.num_bikes_available + "/" + properties.capacity + "<br/><br/>"
             )
             .addTo(map.current);
         });
@@ -139,6 +139,67 @@ export default function App() {
 
   const toggleEDWaitTimes = async () => {
     console.log("Emergency Department Wait Times Toggled");
+    if (!waitTimes) {
+        let facilities = await fetch("https://emergency-department-wait-times.api.smartplymouth.org/facilities").then(function(response) {
+            return response.json();
+        });
+
+        facilities = facilities.facilities;
+        let ed_geojson = {
+            'type': 'FeatureCollection',
+            'features': [
+            ]
+        }
+
+        let ed_features = facilities.map((facility) => {
+                return {
+                    'type': 'Feature',
+                    'geometry': {
+                        'type': 'Point',
+                        'coordinates': [facility.latitude, facility.longitude]
+                    },
+                    'properties': {
+                        'title': facility.name,
+                        'address': facility.address,
+                        'id': facility.station_id,
+                        'type': facility.type,
+                        'telephone': facility.telephone,
+                        'nhs_trust': facility.nhs_trust
+                    }
+                }
+            }
+        );
+
+        ed_geojson.features = ed_features;
+
+        map.current.loadImage(
+            'https://map.smartplymouth.org/icons/hospital_marker.png',
+        (error, image) => {
+        if (error) throw error;
+        // Add the image to the map style.
+        map.current.addImage('urgentcare-icon', image);
+        });
+
+        map.current.addSource('ed-facilities', {
+            type: 'geojson',
+            data: ed_geojson
+        });
+
+        map.current.addLayer({
+                'id': 'ed-layer',
+                'type': 'symbol',
+                'source': 'ed-facilities',
+                'layout': {
+                    'icon-image': 'urgentcare-icon',
+                }
+        });
+
+        setWaitTimes(true);
+    } else {
+        map.current.removeLayer('ed-layer');
+        map.current.removeSource('ed-facilities');
+        setWaitTimes(false);
+    }
   };
 
   const togglePublicToilets = async () => {
@@ -287,7 +348,7 @@ export default function App() {
             <TreeItem icon={<PedalBikeIcon />} nodeId="itemBerylStations" label="Beryl Bike Stations" onClick={toggleBerylStations} />
           </TreeItem>
           <TreeItem nodeId="catHealth" label="Health">
-            <TreeItem icon={<LocalHospitalIcon />} nodeId="itemEDWaitTimes" label="Emergency Department Wait Times" onClick={toggleEDWaitTimes} />
+            <TreeItem icon={<LocalHospitalIcon />} nodeId="itemEDWaitTimes" label="Urgent Care Wait Times" onClick={toggleEDWaitTimes} />
           </TreeItem>
           <TreeItem nodeId="catAmenities" label="Amenities">
             <TreeItem icon={<WcIcon />} nodeId="itemPublicToilets" label="Public Toilets" onClick={togglePublicToilets} />
