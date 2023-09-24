@@ -7,7 +7,7 @@ import TreeItem from '@mui/lab/TreeItem';
 // Icons
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import TrafficIcon from '@mui/icons-material/Traffic';
+import ElectricBikeIcon from '@mui/icons-material/ElectricBike';
 import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
 import WcIcon from '@mui/icons-material/Wc';
 
@@ -30,6 +30,10 @@ export default function App() {
         setTraffic(true);
         map.current.setStyle('mapbox://styles/mapbox/navigation-day-v1')
     }
+  };
+
+  const toggleBerylStations = async () => {
+    console.log("Beryl Stations Toggled");
   };
 
   const toggleEDWaitTimes = async () => {
@@ -178,6 +182,9 @@ export default function App() {
           defaultExpandIcon={<ChevronRightIcon />}
           sx={{ height: 300, flexGrow: 1, maxWidth: 400, overflowY: 'auto' }}
         >
+          <TreeItem nodeId="catTransport" label="Transport">
+            <TreeItem icon={<ElectricBikeIcon />} nodeId="itemBerylStations" label="Beryl Bike Stations" onClick={toggleBerylStations} />
+          </TreeItem>
           <TreeItem nodeId="catHealth" label="Health">
             <TreeItem icon={<LocalHospitalIcon />} nodeId="itemEDWaitTimes" label="Emergency Department Wait Times" onClick={toggleEDWaitTimes} />
           </TreeItem>
