@@ -32,7 +32,7 @@ export default function App() {
     }
   };
 
-  const toggleEDWaitTimes = () => {
+  const toggleEDWaitTimes = async () => {
     console.log("Emergency Department Wait Times Toggled");
   };
 
@@ -61,7 +61,8 @@ export default function App() {
                         'opening_hours': toilet.opening_hours,
                         'fee': toilet.fee,
                         'id': toilet.id,
-                        'attributes': toilet.attributes
+                        'attributes': toilet.attributes,
+                        'address': toilet.address
                     }
                 }
             }
@@ -114,6 +115,7 @@ export default function App() {
             new mapboxgl.Popup()
             .setLngLat(coordinates)
             .setHTML("<h3>" + properties.title + "</h3>" +
+                     "<strong>Address: </strong>" + properties.address + "<br />" +
                      "<strong>Fee: </strong>" + properties.fee + "<br />" +
                      "<strong>Attributes: </strong>" + html_attributes + "<br />" +
                      "<strong>Opening Times: </strong> <br />" +
