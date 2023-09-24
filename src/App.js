@@ -57,7 +57,11 @@ export default function App() {
                         'coordinates': [toilet.latitude, toilet.longitude]
                     },
                     'properties': {
-                        'title': toilet.name
+                        'title': toilet.name,
+                        'opening_hours': toilet.opening_hours,
+                        'fee': toilet.fee,
+                        'id': toilet.id,
+                        'attributes': toilet.attributes
                     }
                 }
             }
@@ -65,26 +69,77 @@ export default function App() {
         toilet_geojson.features = toilet_features;
 
         map.current.loadImage(
-            'https://map.smartplymouth.org/icons/toilet.png',
+            'https://map.smartplymouth.org/icons/toilet_marker.png',
         (error, image) => {
         if (error) throw error;
 
         // Add the image to the map style.
-        map.current.addImage('cat', image);
+        map.current.addImage('toilet-icon', image);
         });
 
         map.current.addSource('toilets', {
             type: 'geojson',
             data: toilet_geojson
         });
+
         map.current.addLayer({
                 'id': 'toilets-layer',
                 'type': 'symbol',
                 'source': 'toilets',
                 'layout': {
-                    'icon-image': 'cat',
+                    'icon-image': 'toilet-icon',
                 }
         });
+
+        map.current.on('click', 'toilets-layer', (e) => {
+            // Copy coordinates array.
+            const coordinates = e.features[0].geometry.coordinates.slice();
+            const properties = e.features[0].properties;
+
+            // Ensure that if the map is zoomed out such that multiple
+            // copies of the feature are visible, the popup appears
+            // over the copy being pointed to.
+            while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+                coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+            }
+
+            let attributes = JSON.parse(properties.attributes);
+            let html_attributes = attributes.map((attribute) => {
+                return "<img src='https://map.smartplymouth.org/icons/" + attribute + ".png' alt='" + attribute + "' title='" + attribute + "' width='40px' />";
+            })
+            html_attributes = html_attributes.join('')
+
+            let opening_hours = JSON.parse(properties.opening_hours);
+
+            new mapboxgl.Popup()
+            .setLngLat(coordinates)
+            .setHTML("<h3>" + properties.title + "</h3>" +
+                     "<strong>Fee: </strong>" + properties.fee + "<br />" +
+                     "<strong>Attributes: </strong>" + html_attributes + "<br />" +
+                     "<strong>Opening Times: </strong> <br />" +
+                     "<table>" +
+                     "<tr><td><strong>Sunday</strong></td><td>" + opening_hours.sun.open + "-" + opening_hours.sun.close + "</td></tr>" +
+                     "<tr><td><strong>Monday</strong></td><td>" + opening_hours.mon.open + "-" + opening_hours.mon.close + "</td></tr>" +
+                     "<tr><td><strong>Tuesday</strong></td><td>" + opening_hours.tue.open + "-" + opening_hours.tue.close + "</td></tr>" +
+                     "<tr><td><strong>Wednesday</strong></td><td>" + opening_hours.wed.open + "-" + opening_hours.wed.close + "</td></tr>" +
+                     "<tr><td><strong>Thursday</strong></td><td>" + opening_hours.thu.open + "-" + opening_hours.thu.close + "</td></tr>" +
+                     "<tr><td><strong>Friday</strong></td><td>" + opening_hours.fri.open + "-" + opening_hours.fri.close + "</td></tr>" +
+                     "<tr><td><strong>Saturday</strong></td><td>" + opening_hours.sat.open + "-" + opening_hours.sat.close + "</td></tr>" +
+                     "</table>"
+            )
+            .addTo(map.current);
+        });
+
+        // Change the cursor to a pointer when the mouse is over the places layer.
+            map.current.on('mouseenter', 'toilets-layer', () => {
+            map.current.getCanvas().style.cursor = 'pointer';
+        });
+
+        // Change it back to a pointer when it leaves.
+            map.current.on('mouseleave', 'toilets-layer', () => {
+            map.current.getCanvas().style.cursor = '';
+        });
+
         setToilets(true);
     } else {
         map.current.removeLayer('toilets-layer');
