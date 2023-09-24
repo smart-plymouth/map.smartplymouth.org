@@ -388,13 +388,25 @@ export default function App() {
           sx={{ height: 300, flexGrow: 1, maxWidth: 400, overflowY: 'auto' }}
         >
           <TreeItem nodeId="catTransport" label="Transport">
-            <TreeItem icon={<PedalBikeIcon />} nodeId="itemBerylStations" label="Beryl Bike Stations" onClick={toggleBerylStations} />
+              {berylBikes ? (
+                <TreeItem icon={<PedalBikeIcon />} nodeId="itemBerylStations" label="✅ Beryl Bike Stations" onClick={toggleBerylStations} />
+              ) : (
+                <TreeItem icon={<PedalBikeIcon />} nodeId="itemBerylStations" label="❌ Beryl Bike Stations" onClick={toggleBerylStations} />
+              )}
           </TreeItem>
           <TreeItem nodeId="catHealth" label="Health">
-            <TreeItem icon={<LocalHospitalIcon />} nodeId="itemEDWaitTimes" label="Urgent Care Wait Times" onClick={toggleEDWaitTimes} />
+            {waitTimes ? (
+                <TreeItem icon={<LocalHospitalIcon />} nodeId="itemEDWaitTimes" label="✅ Urgent Care Wait Times" onClick={toggleEDWaitTimes} />
+            ) : (
+                <TreeItem icon={<LocalHospitalIcon />} nodeId="itemEDWaitTimes" label="❌ Urgent Care Wait Times" onClick={toggleEDWaitTimes} />
+            )}
           </TreeItem>
           <TreeItem nodeId="catAmenities" label="Amenities">
-            <TreeItem icon={<WcIcon />} nodeId="itemPublicToilets" label="Public Toilets" onClick={togglePublicToilets} />
+            {toilets ? (
+                <TreeItem icon={<WcIcon />} nodeId="itemPublicToilets" label="✅ Public Toilets" onClick={togglePublicToilets} />
+            ) : (
+                <TreeItem icon={<WcIcon />} nodeId="itemPublicToilets" label="❌ Public Toilets" onClick={togglePublicToilets} />
+            )}
           </TreeItem>
       </TreeView>
       </div>
