@@ -17,6 +17,7 @@ export default function App() {
   const mapContainer = useRef(null);
   const map = useRef(null);
   const [traffic, setTraffic] = useState(false);
+  const [toilets, setToilets] = useState(false);
   const [lng, setLng] = useState(-4.1394);
   const [lat, setLat] = useState(50.3926);
   const [zoom, setZoom] = useState(12);
@@ -35,8 +36,61 @@ export default function App() {
     console.log("Emergency Department Wait Times Toggled");
   };
 
-  const togglePublicToilets = () => {
+  const togglePublicToilets = async () => {
     console.log("Public Toilets Toggled");
+    if (!toilets) {
+        let toilet_data = await fetch("https://public-toilets.api.smartplymouth.org/toilets").then(function(response) {
+            return response.json();
+        });
+
+        let toilet_geojson = {
+            'type': 'FeatureCollection',
+            'features': [
+            ]
+        }
+
+        let toilet_features = toilet_data.toilets.map((toilet) => {
+                return {
+                    'type': 'Feature',
+                    'geometry': {
+                        'type': 'Point',
+                        'coordinates': [toilet.latitude, toilet.longitude]
+                    },
+                    'properties': {
+                        'title': toilet.name
+                    }
+                }
+            }
+        );
+        toilet_geojson.features = toilet_features;
+
+        map.current.loadImage(
+            'https://map.smartplymouth.org/icons/toilet.png',
+        (error, image) => {
+        if (error) throw error;
+
+        // Add the image to the map style.
+        map.current.addImage('cat', image);
+        });
+
+        map.current.addSource('toilets', {
+            type: 'geojson',
+            data: toilet_geojson
+        });
+        map.current.addLayer({
+                'id': 'toilets-layer',
+                'type': 'symbol',
+                'source': 'toilets',
+                'layout': {
+                    'icon-image': 'cat',
+                }
+        });
+        setToilets(true);
+    } else {
+        map.current.removeLayer('toilets-layer');
+        map.current.removeSource('toilets');
+        setToilets(false);
+    }
   };
 
   useEffect(() => {
@@ -67,9 +121,6 @@ export default function App() {
           defaultExpandIcon={<ChevronRightIcon />}
           sx={{ height: 300, flexGrow: 1, maxWidth: 400, overflowY: 'auto' }}
         >
-          <TreeItem nodeId="catTransport" label="Transport">
-            <TreeItem icon={<TrafficIcon />} nodeId="itemTraffic" label="Traffic" onClick={toggleTraffic} />
-          </TreeItem>
           <TreeItem nodeId="catHealth" label="Health">
             <TreeItem icon={<LocalHospitalIcon />} nodeId="itemEDWaitTimes" label="Emergency Department Wait Times" onClick={toggleEDWaitTimes} />
           </TreeItem>
