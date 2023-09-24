@@ -161,7 +161,7 @@ export default function App() {
                     'properties': {
                         'title': facility.name,
                         'address': facility.address,
-                        'id': facility.station_id,
+                        'id': facility.id,
                         'type': facility.type,
                         'telephone': facility.telephone,
                         'nhs_trust': facility.nhs_trust
@@ -192,6 +192,49 @@ export default function App() {
                 'layout': {
                     'icon-image': 'urgentcare-icon',
                 }
+        });
+
+        map.current.on('click', 'ed-layer', async (e) => {
+            // Copy coordinates array.
+            const coordinates = e.features[0].geometry.coordinates.slice();
+            const properties = e.features[0].properties;
+
+            // Ensure that if the map is zoomed out such that multiple
+            // copies of the feature are visible, the popup appears
+            // over the copy being pointed to.
+            while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+                coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+            }
+
+            let data = await fetch("https://emergency-department-wait-times.api.smartplymouth.org/facilities/" + properties.id).then(function(response) {
+                return response.json();
+            });
+            let facilityWaitTimes = data.data;
+            let currentWaitTimes = facilityWaitTimes.pop();
+
+            new mapboxgl.Popup()
+            .setLngLat(coordinates)
+            .setHTML(
+                "<h3>" + properties.title + "</h3>" +
+                "<strong>Address: </strong>" + properties.address + "<br/>" +
+                "<strong>Telephone: </strong>" + properties.telephone + "<br/>" +
+                "<strong>Type: </strong>" + properties.type + "<br/><br/>" +
+                "<strong>Total Patients: </strong>" + currentWaitTimes.patients_in_department + "<br/>" +
+                "<strong>Patients Waiting: </strong>" + currentWaitTimes.patients_waiting + "<br/>" +
+                "<strong>Longest Wait: </strong>" + currentWaitTimes.longest_wait + " mins <br/><br/>" +
+                "<strong>Last Updated: " + currentWaitTimes.dt + "</strong>"
+            )
+            .addTo(map.current);
+        });
+
+        // Change the cursor to a pointer when the mouse is over the places layer.
+            map.current.on('mouseenter', 'ed-layer', () => {
+            map.current.getCanvas().style.cursor = 'pointer';
+        });
+
+        // Change it back to a pointer when it leaves.
+            map.current.on('mouseleave', 'ed-layer', () => {
+            map.current.getCanvas().style.cursor = '';
         });
 
         setWaitTimes(true);
