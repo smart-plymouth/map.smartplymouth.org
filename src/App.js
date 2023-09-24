@@ -114,7 +114,7 @@ export default function App() {
 
             new mapboxgl.Popup()
             .setLngLat(coordinates)
-            .setHTML("<h3>" + properties.title + "</h3>" +
+            .setHTML("<h2>" + properties.title + "</h2>" +
                      "<strong>Address: </strong>" + properties.address + "<br />" +
                      "<strong>Fee: </strong>" + properties.fee + "<br />" +
                      "<strong>Attributes: </strong>" + html_attributes + "<br />" +
