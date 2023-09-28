@@ -222,7 +222,9 @@ export default function App() {
                 "<strong>Total Patients: </strong>" + currentWaitTimes.patients_in_department + "<br/>" +
                 "<strong>Patients Waiting: </strong>" + currentWaitTimes.patients_waiting + "<br/>" +
                 "<strong>Longest Wait: </strong>" + currentWaitTimes.longest_wait + " mins <br/><br/>" +
-                "<strong>Last Updated: " + currentWaitTimes.dt + "</strong>"
+                "<strong>Last Updated: " + currentWaitTimes.dt + "</strong>" +
+                "<br/><br/>" + 
+                "<a href='https://dashboards.smartplymouth.org/urgent-care/history'>View History</a>"
             )
             .addTo(map.current);
         });
