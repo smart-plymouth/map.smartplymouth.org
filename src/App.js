@@ -38,7 +38,7 @@ export default function App() {
   const toggleLiveBus = async () => {
     console.log("Live Bus Toggled");
     if (!liveBus) {
-        let citybus_data = await fetch("https://www.plymouthbus.co.uk/_ajax/vehicles").then(function(response) {
+        let citybus_data = await fetch("http://localhost:5000/proxy/vehicles").then(function(response) {
             return response.json();
         });
 
@@ -68,6 +68,7 @@ export default function App() {
             // Copy coordinates array.
             const coordinates = e.features[0].geometry.coordinates.slice();
             const properties = e.features[0].properties;
+            const meta = JSON.parse(e.features[0].properties.meta);
 
             // Ensure that if the map is zoomed out such that multiple
             // copies of the feature are visible, the popup appears
@@ -76,21 +77,12 @@ export default function App() {
                 coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
             }
 
-            let station_status = await fetch("https://gbfs.beryl.cc/v2_2/Plymouth/station_status.json").then(function(response) {
-                return response.json();
-            });
-            let selectedStation = null;
-            for (let currentStation in station_status.data.stations) {
-                if (properties.id == station_status.data.stations[currentStation].station_id) {
-                    selectedStation = station_status.data.stations[currentStation]
-                }
-            }
-
             new mapboxgl.Popup()
             .setLngLat(coordinates)
             .setHTML(
-                "<h3>" + properties.title + "</h3>" +
-                "<strong>Available Bikes: </strong>" + selectedStation.num_bikes_available + "/" + properties.capacity + "<br/><br/>"
+                "<strong>Route: </strong>" + properties.line + "<br />" +
+                "<strong>Number Plate: </strong>" + meta.number_plate + "<br />" +
+                "<strong>Operator: </strong>" + properties.operator + "<br />"
             )
             .addTo(map.current);
         });
@@ -184,7 +176,7 @@ export default function App() {
             });
             let selectedStation = null;
             for (let currentStation in station_status.data.stations) {
-                if (properties.id == station_status.data.stations[currentStation].station_id) {
+                if (properties.id === station_status.data.stations[currentStation].station_id) {
                     selectedStation = station_status.data.stations[currentStation]
                 }
             }
