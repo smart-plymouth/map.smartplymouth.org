@@ -20,6 +20,7 @@ export default function App() {
   const [toilets, setToilets] = useState(false);
   const [berylBikes, setBerylBikes] = useState(false);
   const [waitTimes, setWaitTimes] = useState(false);
+  const [liveBus, setLiveBus] = useState(false);
   const [lng, setLng] = useState(-4.1394);
   const [lat, setLat] = useState(50.3926);
   const [zoom, setZoom] = useState(12);
@@ -31,6 +32,109 @@ export default function App() {
     } else {
         setTraffic(true);
         map.current.setStyle('mapbox://styles/mapbox/navigation-day-v1')
+    }
+  };
+
+  const toggleLiveBus = async () => {
+    console.log("Live Bus Toggled");
+    if (!liveBus) {
+        let beryl_data = await fetch("https://gbfs.beryl.cc/v2_2/Plymouth/station_information.json").then(function(response) {
+            return response.json();
+        });
+        let stations = beryl_data.data.stations;
+
+        let beryl_geojson = {
+            'type': 'FeatureCollection',
+            'features': [
+            ]
+        }
+
+        let beryl_features = stations.map((station) => {
+                return {
+                    'type': 'Feature',
+                    'geometry': {
+                        'type': 'Point',
+                        'coordinates': [station.lon, station.lat]
+                    },
+                    'properties': {
+                        'title': station.name,
+                        'capacity': station.capacity,
+                        'id': station.station_id
+                    }
+                }
+            }
+        );
+
+        beryl_geojson.features = beryl_features;
+
+        map.current.loadImage(
+            'https://map.smartplymouth.org/icons/red_bus.png',
+        (error, image) => {
+        if (error) throw error;
+        // Add the image to the map style.
+        map.current.addImage('bus-icon', image);
+        });
+
+        map.current.addSource('livebus-data', {
+            type: 'geojson',
+            data: beryl_geojson
+        });
+
+        map.current.addLayer({
+                'id': 'livebus-layer',
+                'type': 'symbol',
+                'source': 'livebus-data',
+                'layout': {
+                    'icon-image': 'bus-icon',
+                }
+        });
+
+        map.current.on('click', 'livebus-layer', async (e) => {
+            // Copy coordinates array.
+            const coordinates = e.features[0].geometry.coordinates.slice();
+            const properties = e.features[0].properties;
+
+            // Ensure that if the map is zoomed out such that multiple
+            // copies of the feature are visible, the popup appears
+            // over the copy being pointed to.
+            while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+                coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+            }
+
+            let station_status = await fetch("https://gbfs.beryl.cc/v2_2/Plymouth/station_status.json").then(function(response) {
+                return response.json();
+            });
+            let selectedStation = null;
+            for (let currentStation in station_status.data.stations) {
+                if (properties.id == station_status.data.stations[currentStation].station_id) {
+                    selectedStation = station_status.data.stations[currentStation]
+                }
+            }
+
+            new mapboxgl.Popup()
+            .setLngLat(coordinates)
+            .setHTML(
+                "<h3>" + properties.title + "</h3>" +
+                "<strong>Available Bikes: </strong>" + selectedStation.num_bikes_available + "/" + properties.capacity + "<br/><br/>"
+            )
+            .addTo(map.current);
+        });
+
+        // Change the cursor to a pointer when the mouse is over the places layer.
+            map.current.on('mouseenter', 'livebus-layer', () => {
+            map.current.getCanvas().style.cursor = 'pointer';
+        });
+
+        // Change it back to a pointer when it leaves.
+            map.current.on('mouseleave', 'livebus-layer', () => {
+            map.current.getCanvas().style.cursor = '';
+        });
+
+        setLiveBus(true);
+    } else {
+        map.current.removeLayer('livebus-layer');
+        map.current.removeSource('livebus-data');
+        setLiveBus(false);
     }
   };
 
@@ -394,6 +498,11 @@ export default function App() {
                 <TreeItem icon={<PedalBikeIcon />} nodeId="itemBerylStations" label="✅ Beryl Bike Stations" onClick={toggleBerylStations} />
               ) : (
                 <TreeItem icon={<PedalBikeIcon />} nodeId="itemBerylStations" label="❌ Beryl Bike Stations" onClick={toggleBerylStations} />
+              )}
+              {liveBus ? (
+                <TreeItem icon={<PedalBikeIcon />} nodeId="itemLiveBuses" label="✅ Citybus Live Feed" onClick={toggleLiveBus} />
+              ) : (
+                <TreeItem icon={<PedalBikeIcon />} nodeId="itemLiveBuses" label="❌ Citybus Live Feed" onClick={toggleLiveBus} />
               )}
           </TreeItem>
           <TreeItem nodeId="catHealth" label="Health">
