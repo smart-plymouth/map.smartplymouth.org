@@ -38,34 +38,9 @@ export default function App() {
   const toggleLiveBus = async () => {
     console.log("Live Bus Toggled");
     if (!liveBus) {
-        let beryl_data = await fetch("https://gbfs.beryl.cc/v2_2/Plymouth/station_information.json").then(function(response) {
+        let citybus_data = await fetch("https://www.plymouthbus.co.uk/_ajax/vehicles").then(function(response) {
             return response.json();
         });
-        let stations = beryl_data.data.stations;
-
-        let beryl_geojson = {
-            'type': 'FeatureCollection',
-            'features': [
-            ]
-        }
-
-        let beryl_features = stations.map((station) => {
-                return {
-                    'type': 'Feature',
-                    'geometry': {
-                        'type': 'Point',
-                        'coordinates': [station.lon, station.lat]
-                    },
-                    'properties': {
-                        'title': station.name,
-                        'capacity': station.capacity,
-                        'id': station.station_id
-                    }
-                }
-            }
-        );
-
-        beryl_geojson.features = beryl_features;
 
         map.current.loadImage(
             'https://map.smartplymouth.org/icons/red_bus.png',
@@ -77,7 +52,7 @@ export default function App() {
 
         map.current.addSource('livebus-data', {
             type: 'geojson',
-            data: beryl_geojson
+            data: citybus_data
         });
 
         map.current.addLayer({
