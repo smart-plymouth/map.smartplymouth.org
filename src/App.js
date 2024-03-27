@@ -1,8 +1,8 @@
 import React, { useRef, useEffect, useState } from 'react';
 import mapboxgl from '!mapbox-gl'; // eslint-disable-line import/no-webpack-loader-syntax
 
-import TreeView from '@mui/lab/TreeView';
-import TreeItem from '@mui/lab/TreeItem';
+import { TreeView } from '@mui/x-tree-view/TreeView'
+import { TreeItem } from '@mui/x-tree-view/TreeItem'
 
 // Icons
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
@@ -460,30 +460,30 @@ export default function App() {
           defaultExpandIcon={<ChevronRightIcon />}
           sx={{ height: 300, flexGrow: 1, maxWidth: 400, overflowY: 'auto' }}
         >
-          <TreeItem nodeId="catTransport" label="Transport">
+          <TreeItem nodeId="catTransport" itemId="catTransport" id="catTransport" label="Transport">
               {berylBikes ? (
-                <TreeItem icon={<PedalBikeIcon />} nodeId="itemBerylStations" label="✅ Beryl Bike Stations" onClick={toggleBerylStations} />
+                <TreeItem icon={<PedalBikeIcon />} itemId="itemBerylStations" id="itemBerylStations" nodeId="itemBerylStations" label="✅ Beryl Bike Stations" onClick={toggleBerylStations} />
               ) : (
-                <TreeItem icon={<PedalBikeIcon />} nodeId="itemBerylStations" label="❌ Beryl Bike Stations" onClick={toggleBerylStations} />
+                <TreeItem icon={<PedalBikeIcon />} itemId="itemBerylStations" id="itemBerylStations" nodeId="itemBerylStations" label="❌ Beryl Bike Stations" onClick={toggleBerylStations} />
               )}
               {liveBus ? (
-                <TreeItem icon={<PedalBikeIcon />} nodeId="itemLiveBuses" label="✅ Citybus Live Feed" onClick={toggleLiveBus} />
+                <TreeItem icon={<PedalBikeIcon />} itemId="itemLiveBuses" id="itemLiveBuses" nodeId="itemLiveBuses" label="✅ Citybus Live Feed" onClick={toggleLiveBus} />
               ) : (
-                <TreeItem icon={<PedalBikeIcon />} nodeId="itemLiveBuses" label="❌ Citybus Live Feed" onClick={toggleLiveBus} />
+                <TreeItem icon={<PedalBikeIcon />} itemId="itemLiveBuses" id="itemLiveBuses" nodeId="itemLiveBuses" label="❌ Citybus Live Feed" onClick={toggleLiveBus} />
               )}
           </TreeItem>
-          <TreeItem nodeId="catHealth" label="Health">
+          <TreeItem nodeId="catHealth" id="catHealth" itemId="catHealth" label="Health">
             {waitTimes ? (
-                <TreeItem icon={<LocalHospitalIcon />} nodeId="itemEDWaitTimes" label="✅ Urgent Care Wait Times" onClick={toggleEDWaitTimes} />
+                <TreeItem icon={<LocalHospitalIcon />} itemId="itemEDWaitTimes" id="itemEDWaitTimes" nodeId="itemEDWaitTimes" label="✅ Urgent Care Wait Times" onClick={toggleEDWaitTimes} />
             ) : (
-                <TreeItem icon={<LocalHospitalIcon />} nodeId="itemEDWaitTimes" label="❌ Urgent Care Wait Times" onClick={toggleEDWaitTimes} />
+                <TreeItem icon={<LocalHospitalIcon />} itemId="itemEDWaitTimes" id="itemEDWaitTimes" nodeId="itemEDWaitTimes" label="❌ Urgent Care Wait Times" onClick={toggleEDWaitTimes} />
             )}
           </TreeItem>
-          <TreeItem nodeId="catAmenities" label="Amenities">
+          <TreeItem nodeId="catAmenities" itemId="catAmenities" id="catAmenities" label="Amenities">
             {toilets ? (
-                <TreeItem icon={<WcIcon />} nodeId="itemPublicToilets" label="✅ Public Toilets" onClick={togglePublicToilets} />
+                <TreeItem icon={<WcIcon />} itemId="itemPublicToilets" id="itemPublicToilets" nodeId="itemPublicToilets" label="✅ Public Toilets" onClick={togglePublicToilets} />
             ) : (
-                <TreeItem icon={<WcIcon />} nodeId="itemPublicToilets" label="❌ Public Toilets" onClick={togglePublicToilets} />
+                <TreeItem icon={<WcIcon />} itemId="itemPublicToilets" id="itemPublicToilets" nodeId="itemPublicToilets" label="❌ Public Toilets" onClick={togglePublicToilets} />
             )}
           </TreeItem>
       </TreeView>
