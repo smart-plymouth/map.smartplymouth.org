@@ -38,7 +38,7 @@ export default function App() {
   const toggleLiveBus = async () => {
     console.log("Live Bus Toggled");
     if (!liveBus) {
-        let citybus_data = await fetch("http://localhost:5000/proxy/vehicles").then(function(response) {
+        let citybus_data = await fetch("https://buses.api.smartplymouth.org/proxy/vehicles").then(function(response) {
             return response.json();
         });
 
