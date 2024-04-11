@@ -38,7 +38,7 @@ export default function App() {
   const toggleLiveBus = async () => {
     console.log("Live Bus Toggled");
     if (!liveBus) {
-        let citybus_data = await fetch("https://buses.api.smartplymouth.org/proxy/vehicles").then(function(response) {
+        let citybus_data = await fetch("https://buses-api.smartplymouth.org/proxy/vehicles").then(function(response) {
             return response.json();
         });
 
@@ -321,7 +321,7 @@ export default function App() {
   const togglePublicToilets = async () => {
     console.log("Public Toilets Toggled");
     if (!toilets) {
-        let toilet_data = await fetch("https://public-toilets.api.smartplymouth.org/toilets").then(function(response) {
+        let toilet_data = await fetch("https://public-toilets-api.smartplymouth.org/toilets").then(function(response) {
             return response.json();
         });
 
