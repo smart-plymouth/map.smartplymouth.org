@@ -20,7 +20,6 @@ export default function App() {
   const [toilets, setToilets] = useState(false);
   const [berylBikes, setBerylBikes] = useState(false);
   const [waitTimes, setWaitTimes] = useState(false);
-  const [liveBus, setLiveBus] = useState(false);
   const [lng, setLng] = useState(-4.1394);
   const [lat, setLat] = useState(50.3926);
   const [zoom, setZoom] = useState(12);
@@ -32,76 +31,6 @@ export default function App() {
     } else {
         setTraffic(true);
         map.current.setStyle('mapbox://styles/mapbox/navigation-day-v1')
-    }
-  };
-
-  const toggleLiveBus = async () => {
-    console.log("Live Bus Toggled");
-    if (!liveBus) {
-        let citybus_data = await fetch("https://buses-api.smartplymouth.org/proxy/vehicles").then(function(response) {
-            return response.json();
-        });
-
-        map.current.loadImage(
-            'https://map.smartplymouth.org/icons/red_bus.png',
-        (error, image) => {
-        if (error) throw error;
-        // Add the image to the map style.
-        map.current.addImage('bus-icon', image);
-        });
-
-        map.current.addSource('livebus-data', {
-            type: 'geojson',
-            data: citybus_data
-        });
-
-        map.current.addLayer({
-                'id': 'livebus-layer',
-                'type': 'symbol',
-                'source': 'livebus-data',
-                'layout': {
-                    'icon-image': 'bus-icon',
-                }
-        });
-
-        map.current.on('click', 'livebus-layer', async (e) => {
-            // Copy coordinates array.
-            const coordinates = e.features[0].geometry.coordinates.slice();
-            const properties = e.features[0].properties;
-            const meta = JSON.parse(e.features[0].properties.meta);
-
-            // Ensure that if the map is zoomed out such that multiple
-            // copies of the feature are visible, the popup appears
-            // over the copy being pointed to.
-            while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
-                coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
-            }
-
-            new mapboxgl.Popup()
-            .setLngLat(coordinates)
-            .setHTML(
-                "<strong>Route: </strong>" + properties.line + "<br />" +
-                "<strong>Number Plate: </strong>" + meta.number_plate + "<br />" +
-                "<strong>Operator: </strong>" + properties.operator + "<br />"
-            )
-            .addTo(map.current);
-        });
-
-        // Change the cursor to a pointer when the mouse is over the places layer.
-            map.current.on('mouseenter', 'livebus-layer', () => {
-            map.current.getCanvas().style.cursor = 'pointer';
-        });
-
-        // Change it back to a pointer when it leaves.
-            map.current.on('mouseleave', 'livebus-layer', () => {
-            map.current.getCanvas().style.cursor = '';
-        });
-
-        setLiveBus(true);
-    } else {
-        map.current.removeLayer('livebus-layer');
-        map.current.removeSource('livebus-data');
-        setLiveBus(false);
     }
   };
 
@@ -211,7 +140,7 @@ export default function App() {
   const toggleEDWaitTimes = async () => {
     console.log("Emergency Department Wait Times Toggled");
     if (!waitTimes) {
-        let facilities = await fetch("https://emergency-department-wait-times.api.smartplymouth.org/facilities").then(function(response) {
+        let facilities = await fetch("https://ed-wait-times-api.smartplymouth.org/facilities").then(function(response) {
             return response.json();
         });
 
@@ -277,7 +206,7 @@ export default function App() {
                 coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
             }
 
-            let data = await fetch("https://emergency-department-wait-times.api.smartplymouth.org/facilities/" + properties.id).then(function(response) {
+            let data = await fetch("https://ed-wait-times-api.smartplymouth.org/facilities/" + properties.id).then(function(response) {
                 return response.json();
             });
             let facilityWaitTimes = data.data;
@@ -465,11 +394,6 @@ export default function App() {
                 <TreeItem icon={<PedalBikeIcon />} itemId="itemBerylStations" id="itemBerylStations" nodeId="itemBerylStations" label="✅ Beryl Bike Stations" onClick={toggleBerylStations} />
               ) : (
                 <TreeItem icon={<PedalBikeIcon />} itemId="itemBerylStations" id="itemBerylStations" nodeId="itemBerylStations" label="❌ Beryl Bike Stations" onClick={toggleBerylStations} />
-              )}
-              {liveBus ? (
-                <TreeItem icon={<PedalBikeIcon />} itemId="itemLiveBuses" id="itemLiveBuses" nodeId="itemLiveBuses" label="✅ Citybus Live Feed" onClick={toggleLiveBus} />
-              ) : (
-                <TreeItem icon={<PedalBikeIcon />} itemId="itemLiveBuses" id="itemLiveBuses" nodeId="itemLiveBuses" label="❌ Citybus Live Feed" onClick={toggleLiveBus} />
               )}
           </TreeItem>
           <TreeItem nodeId="catHealth" id="catHealth" itemId="catHealth" label="Health">
