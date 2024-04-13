@@ -1,0 +1,32 @@
+[
+  {
+    "slug": "transport",
+    "name": "Transport"
+    "data_sets": [
+      {
+        "slug": "beryl-bike-stations",
+        "name": "Beryl Bike Stations"
+      }
+    ]
+  },
+  {
+    "slug": "health",
+    "name": "Health",
+    "data_sets": [
+      {
+        "slug": "urgent-care-wait-times",
+        "name": "Urgent Care Wait Times"
+      }
+    ]
+  },
+  {
+    "slug": "amenities",
+    "name": "Amenities",
+    "data_sets": [
+      {
+        "slug": "public-toilets",
+        "name": "Public Toilets"
+      }
+    ]
+  }
+]
